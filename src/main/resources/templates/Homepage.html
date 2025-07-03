@@ -1,10 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>All Users</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+<div class="container mt-4">
+    <h1 class="text-center">Real-Time Chat Application</h1>
+    <div id="chat" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;">
+        <h1 class="text-center">Available Users</h1>
+        <div id="userList" class="list-group mt-4"></div>
+    </div>
 
+</div>
 </body>
+
+<script>
+    window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("userId");
+        fetch("http://localhost:8080/chat-app/users") // Adjust endpoint as needed
+            .then(response => response.json())
+            .then(users => {
+                const userList = document.getElementById("userList");
+                users.forEach(user => {
+                    const userItem = document.createElement("button");
+                    userItem.className = "list-group-item list-group-item-action";
+                    userItem.textContent = user.username; // Or user.username/email
+                    userItem.onclick = () => {
+<!--                        localStorage.setItem("User1", JSON.stringify("mursalin"));-->
+
+                        window.location.href = `PrivateChat.html?userId=${user.username}`;
+                    };
+                    userList.appendChild(userItem);
+                });
+            });
+    };
+</script>
 </html>

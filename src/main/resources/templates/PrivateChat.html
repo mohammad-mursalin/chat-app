@@ -15,10 +15,10 @@
          style="height: 300px; overflow-y: auto;">
     </div>
 
-    <div class="input-group mb-3">
-        <input id="senderInput" type="text" class="form-control"
-               placeholder="Your name...."/>
-    </div>
+<!--    <div class="input-group mb-3">-->
+<!--        <input id="senderInput" type="text" class="form-control"-->
+<!--               placeholder="Your name...."/>-->
+<!--    </div>-->
 
 
     <div class="input-group mb-3">
@@ -31,6 +31,13 @@
 </div>
 </body>
 <script>
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const sender = JSON.parse(localStorage.getItem("User1")); // current logged-in user object
+    const receiverId = urlParams.get("username"); // userId from URL
+
+    const currentSender = sender; // Adjust according to your user object structure
+
 
     function setConnected(connected){
         document.getElementById('sendMessage').disabled = !connected;
@@ -49,7 +56,7 @@
         function showMessage(message) {
             const chat = document.getElementById('chat');
             const messageElement = document.createElement('div');
-            const currentSender = document.getElementById('senderInput').value;
+<!--            const currentSender = document.getElementById('senderInput').value;-->
 
             // Apply styling based on sender
             if (message.sender === currentSender) {
@@ -66,7 +73,8 @@
 
 
         function sendMessage() {
-            var sender = document.getElementById('senderInput').value;
+<!--            var sender = document.getElementById('senderInput').value;-->
+            var sender = currentSender;
             var content = document.getElementById('messageInput').value;
             var chatMessage = {
                 sender: sender,
