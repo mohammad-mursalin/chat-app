@@ -18,28 +18,46 @@
 
 <script>
     window.onload = function () {
-        // ✅ Retrieve from localStorage
-        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-        const currentUserId = currentUser?.userId;
-        const currentUsername = currentUser?.username;
+        // 🚫 Remove localStorage — use backend to get authenticated user
+        let currentUserId = null;
+        let currentUsername = null;
 
-        fetch("http://localhost:8080/chat-app/users")
+        // 🔁 Fetch current user info from backend
+        fetch("http://localhost:8080/chat-app/current-user")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("User not authenticated");
+                }
+                return response.json();
+            })
+            .then(currentUser => {
+                currentUserId = currentUser.userId;
+                currentUsername = currentUser.username;
+
+                // ✅ Now fetch all users
+                return fetch("http://localhost:8080/chat-app/users");
+            })
             .then(response => response.json())
             .then(users => {
                 const userList = document.getElementById("userList");
                 users.forEach(user => {
-                    if (user.username !== currentUsername) { // Don't show current user
+                    if (user.userID !== currentUserId) {
                         const userItem = document.createElement("button");
                         userItem.className = "list-group-item list-group-item-action";
                         userItem.textContent = user.username;
                         userItem.onclick = () => {
-                            window.location.href = `PrivateChat.html?userId=${user.userId}`;
+                            window.location.href = `private-chat?userId=${user.userId}&username=${encodeURIComponent(user.username)}&currentUserId=${currentUserId}&currentUsername=${encodeURIComponent(currentUsername)}`;
                         };
                         userList.appendChild(userItem);
                     }
                 });
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                window.location.href = "/login?error=true";
             });
     };
 </script>
+
 
 </html>
