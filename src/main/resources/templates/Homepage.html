@@ -18,24 +18,28 @@
 
 <script>
     window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get("userId");
-        fetch("http://localhost:8080/chat-app/users") // Adjust endpoint as needed
+        // ✅ Retrieve from localStorage
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        const currentUserId = currentUser?.userId;
+        const currentUsername = currentUser?.username;
+
+        fetch("http://localhost:8080/chat-app/users")
             .then(response => response.json())
             .then(users => {
                 const userList = document.getElementById("userList");
                 users.forEach(user => {
-                    const userItem = document.createElement("button");
-                    userItem.className = "list-group-item list-group-item-action";
-                    userItem.textContent = user.username; // Or user.username/email
-                    userItem.onclick = () => {
-<!--                        localStorage.setItem("User1", JSON.stringify("mursalin"));-->
-
-                        window.location.href = `PrivateChat.html?userId=${user.username}`;
-                    };
-                    userList.appendChild(userItem);
+                    if (user.username !== currentUsername) { // Don't show current user
+                        const userItem = document.createElement("button");
+                        userItem.className = "list-group-item list-group-item-action";
+                        userItem.textContent = user.username;
+                        userItem.onclick = () => {
+                            window.location.href = `PrivateChat.html?userId=${user.userId}`;
+                        };
+                        userList.appendChild(userItem);
+                    }
                 });
             });
     };
 </script>
+
 </html>
