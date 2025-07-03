@@ -2,8 +2,12 @@ package com.mursalin.chat_app.controller;
 
 import com.mursalin.chat_app.model.Status;
 import com.mursalin.chat_app.model.User;
+import com.mursalin.chat_app.model.UserPrinciples;
 import com.mursalin.chat_app.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
