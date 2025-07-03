@@ -17,7 +17,7 @@ public class UserController {
 
     @GetMapping("/users")
     public List<User> getAllUsers() {
-        return null;
+        return userService.getAllUsers();
     }
 
     @PostMapping("/user/registration")
