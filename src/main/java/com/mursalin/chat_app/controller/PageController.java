@@ -22,7 +22,7 @@ public class PageController {
 
     @GetMapping("/private-chat")
     public String showPrivateChatPage() {
-        return "PrivateChat"; 
+        return "PrivateChat";
     }
 }
 
