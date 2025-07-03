@@ -1,18 +1,23 @@
 package com.mursalin.chat_app.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-//import org.springframework.data.annotation.Id;
-//import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalTime;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @AllArgsConstructor
-//@Document
+@Document
+@Builder
 public class ChatRoom {
 
-//    @Id
+    @Id
     private String chatRoomId;
-    private User sender;
-    private User receiver;
-    private ChatMessage chatMessage;
+    private String senderId;
+    private String receiverId;
+    private String message;
+    private LocalTime sendAt;
 }
