@@ -34,10 +34,13 @@ public class SecurityConfig {
                                         "/register", "/login").permitAll()
                                 .anyRequest().authenticated())
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll())
+                        .loginPage("/login") // shows login.html
+                        .loginProcessingUrl("/perform_login") // where the form submits
+                        .defaultSuccessUrl("/homepage", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
                 .logout(logout -> logout.permitAll())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .build();
     }
 
