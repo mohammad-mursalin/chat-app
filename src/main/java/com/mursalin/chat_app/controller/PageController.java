@@ -19,5 +19,10 @@ public class PageController {
     public String showHomepage() {
         return "Homepage";
     }
+
+    @GetMapping("/private-chat")
+    public String showPrivateChatPage() {
+        return "PrivateChat"; 
+    }
 }
 
