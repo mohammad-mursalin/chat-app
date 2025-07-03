@@ -29,4 +29,11 @@ public class UserController {
     public User login(@RequestBody User user) {
         return userService.login(user);
     }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = ((UserPrinciples)userDetails).getUser();
+        return ResponseEntity.ok(user);
+    }
+
 }
