@@ -45,31 +45,52 @@
     const chatMemberName = params.get("chatMemberName");
     const currentUserId = params.get("currentUserId");
     const currentUsername = params.get("currentUsername");
-
     document.getElementById("chatMemberName").innerText = chatMemberName;
 
     let stompClient = null;
+    let chatRoomId = null;
 
     function setConnected(connected) {
         document.getElementById('sendMessage').disabled = !connected;
     }
 
     function connect() {
-        const socket = new SockJS('http://localhost:8080/homepage');
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, function (frame) {
-            setConnected(true);
-            stompClient.subscribe(`/chatroom/${currentUserId}/${chatMemberId}`, function (message) {
-                showMessage(JSON.parse(message.body));
-            });
-        });
+        // 🔁 First fetch or create chat room
+        fetch("http://localhost:8080/chat-app/chatroom", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify([currentUserId, chatMemberId])  // 👈 send as array
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to fetch chat room");
+            }
+            return response.json();
+        })
+        .then(chatRoom => {
+            chatRoomId = chatRoom.chatRoomId; // ✅ Save chatRoomId
+            const conversations = chatRoom.conversations || [];
 
-        // Fetch previous messages
-        fetch(`http://localhost:8080/chat-app/messages?senderId=${currentUserId}&receiverId=${chatMemberId}`)
-            .then(response => response.json())
-            .then(messages => {
-                messages.forEach(showMessage);
+            // 🕓 Show previous messages
+            conversations.forEach(showMessage);
+
+            // 🔌 Connect WebSocket after loading chatRoomId
+            const socket = new SockJS('http://localhost:8080/homepage');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                setConnected(true);
+                // 📌 Subscribe using chatRoomId (universal for both users)
+                stompClient.subscribe(`/chatroom/${chatRoomId}`, function (message) {
+                    showMessage(JSON.parse(message.body));
+                });
             });
+        })
+        .catch(error => {
+            console.error("Chat room error:", error);
+            alert("Unable to load chat. Please try again.");
+        });
     }
 
     function showMessage(message) {
@@ -90,7 +111,7 @@
 
     function sendMessage() {
         const content = document.getElementById('messageInput').value.trim();
-        if (!content) return;
+        if (!content || !chatRoomId) return;
 
         const chatMessage = {
             senderId: currentUserId,
@@ -99,13 +120,23 @@
             sendAt: new Date().toISOString()
         };
 
-        stompClient.send("/chat-app/send-private-message", {}, JSON.stringify(chatMessage));
-        showMessage(chatMessage);
+        // 📤 Send message to backend via WebSocket
+        stompClient.send("/chat-app/send-private-message", {}, JSON.stringify({
+            chatRoomId: chatRoomId,
+            messageData: {
+                senderId: currentUserId,
+                receiverId: chatMemberId,
+                message: content,
+                sendAt: new Date().toISOString()
+            }
+        }));
+
         document.getElementById('messageInput').value = '';
     }
 
     document.getElementById('sendMessage').onclick = sendMessage;
     window.onload = connect;
 </script>
+
 </body>
 </html>
