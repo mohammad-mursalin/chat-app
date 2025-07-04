@@ -46,7 +46,7 @@
                         userItem.className = "list-group-item list-group-item-action";
                         userItem.textContent = user.username;
                         userItem.onclick = () => {
-                            window.location.href = `private-chat?userId=${user.userId}&username=${encodeURIComponent(user.username)}&currentUserId=${currentUserId}&currentUsername=${encodeURIComponent(currentUsername)}`;
+                            window.location.href = `private-chat?chatMemberId=${user.userId}&chatMemberName=${encodeURIComponent(user.username)}&currentUserId=${currentUserId}&currentUsername=${encodeURIComponent(currentUsername)}`;
                         };
                         userList.appendChild(userItem);
                     }
