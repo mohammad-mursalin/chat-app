@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
 
+    ChatRoom findByChatKey(String generate);
 }
