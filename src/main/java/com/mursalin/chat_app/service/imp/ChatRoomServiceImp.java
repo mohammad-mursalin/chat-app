@@ -7,16 +7,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ChatRoomServiceImp implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final MongoService mongoService;
+
     @Override
     public ChatRoom privateMessageRequest(ChatRoom chatRoom) {
-        chatRoom.setSendAt(LocalTime.now());
+
         return chatRoomRepository.save(chatRoom);
+    }
+
+    @Override
+    public List<ChatRoom> getAllPrivateMessages(String senderId, String receiverId) {
+        return mongoService.getChatsBetweenUsers(senderId, receiverId);
     }
 }
