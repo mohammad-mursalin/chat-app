@@ -32,11 +32,11 @@
 </body>
 <script>
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const sender = JSON.parse(localStorage.getItem("User1")); // current logged-in user object
-    const receiverId = urlParams.get("username"); // userId from URL
-
-    const currentSender = sender; // Adjust according to your user object structure
+    const params = new URLSearchParams(window.location.search);
+    const chatMemberId = params.get("userId");
+    const chatMemberName = params.get("username");
+    const currentUserId = params.get("currentUserId");
+    const currentUsername = params.get("currentUsername");
 
 
     function setConnected(connected){
@@ -59,7 +59,7 @@
 <!--            const currentSender = document.getElementById('senderInput').value;-->
 
             // Apply styling based on sender
-            if (message.sender === currentSender) {
+            if (message.sender.userId === currentSender) {
                 messageElement.className = "text-end mb-2"; // Align to right
                 messageElement.innerHTML = `<span class="bg-primary text-white p-2 rounded">${message.content}  </span>`;
             } else {
