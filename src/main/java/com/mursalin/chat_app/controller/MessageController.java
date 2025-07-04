@@ -1,16 +1,15 @@
 package com.mursalin.chat_app.controller;
 
+import com.mursalin.chat_app.dto.ChatMessageRequest;
 import com.mursalin.chat_app.model.ChatMessage;
 import com.mursalin.chat_app.model.ChatRoom;
+import com.mursalin.chat_app.model.Conversation;
 import com.mursalin.chat_app.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,12 +27,12 @@ public class MessageController {
     }
 
     @MessageMapping("/send-private-message")
-    public ChatRoom handlePrivateMessageRequest( @Payload ChatRoom chatRoom) {
-        return chatRoomService.privateMessageRequest(chatRoom);
+    public void handlePrivateMessageRequest(@Payload ChatMessageRequest chatMessageRequest) {
+        chatRoomService.privateMessageRequest(chatMessageRequest);
     }
 
-    @GetMapping("/messages")
-    public List<ChatRoom> getAllPrivateMessages(@RequestParam String senderId, @RequestParam String receiverId) {
-        return chatRoomService.getAllPrivateMessages(senderId, receiverId);
+    @PostMapping("/chatroom")
+    public ChatRoom getAllPrivateMessages(@RequestBody List<String> membersId) {
+        return chatRoomService.getAllPrivateMessages(membersId);
     }
 }
