@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,5 +19,5 @@ public class ChatRoom {
     private String senderId;
     private String receiverId;
     private String message;
-    private LocalTime sendAt;
+    private LocalDateTime sendAt;
 }
