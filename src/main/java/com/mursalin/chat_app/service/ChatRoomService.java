@@ -1,11 +1,12 @@
 package com.mursalin.chat_app.service;
 
+import com.mursalin.chat_app.dto.ChatMessageRequest;
 import com.mursalin.chat_app.model.ChatRoom;
 
 import java.util.List;
 
 public interface ChatRoomService {
-    ChatRoom privateMessageRequest(ChatRoom chatRoom);
+    void privateMessageRequest(ChatMessageRequest chatRoom);
 
-    List<ChatRoom> getAllPrivateMessages(String senderId, String receiverId);
+    ChatRoom getAllPrivateMessages(List<String> membersId);
 }
