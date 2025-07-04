@@ -1,7 +1,6 @@
 package com.mursalin.chat_app.controller;
 
 import com.mursalin.chat_app.dto.ChatMessageRequest;
-import com.mursalin.chat_app.model.ChatMessage;
 import com.mursalin.chat_app.model.ChatRoom;
 import com.mursalin.chat_app.model.Conversation;
 import com.mursalin.chat_app.service.ChatRoomService;
@@ -22,8 +21,8 @@ public class MessageController {
 
     @MessageMapping("/send-message")
     @SendTo("/chatroom/all")
-    public ChatMessage handleMessageRequest(ChatMessage chatMessage) {
-        return chatMessage;
+    public Conversation handleMessageRequest(Conversation conversation) {
+        return conversation;
     }
 
     @MessageMapping("/send-private-message")
