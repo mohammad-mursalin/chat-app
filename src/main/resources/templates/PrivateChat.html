@@ -112,8 +112,13 @@
             messageElement.className = "message-right mb-3";
             messageElement.innerHTML = `<span class="bg-primary text-white p-2 rounded">${message.message}</span>`;
         } else {
-            messageElement.className = "message-left mb-3";
-            messageElement.innerHTML = `<span class="bg-light p-2 rounded">${message.senderName}: ${message.message}</span>`;
+            if(isGroupChat) {
+                messageElement.className = "message-left mb-3";
+                messageElement.innerHTML = `<span class="bg-light p-2 rounded">${message.senderName}: ${message.message}</span>`;
+            } else {
+                messageElement.className = "message-left mb-3";
+                messageElement.innerHTML = `<span class="bg-light p-2 rounded">${message.message}</span>`;
+            }
         }
 
         chat.appendChild(messageElement);
