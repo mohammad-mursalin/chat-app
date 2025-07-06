@@ -1,5 +1,6 @@
 package com.mursalin.chat_app.service.imp;
 
+import com.mursalin.chat_app.dto.GroupListResponse;
 import com.mursalin.chat_app.model.User;
 import com.mursalin.chat_app.repository.UserRepository;
 import com.mursalin.chat_app.service.UserService;
@@ -20,6 +21,7 @@ public class UserServiceImp implements UserService {
     private final PasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final MongoService mongoService;
 
     @Override
     public User registerNewUser(User newUser) {
@@ -49,4 +51,11 @@ public class UserServiceImp implements UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    @Override
+    public List<GroupListResponse> getUserGroups(String currentUserId) {
+        return mongoService.getUserGroups(currentUserId);
+    }
+
+
 }
