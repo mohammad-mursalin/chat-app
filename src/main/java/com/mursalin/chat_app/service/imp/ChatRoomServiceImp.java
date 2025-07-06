@@ -12,11 +12,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,7 +40,7 @@ public class ChatRoomServiceImp implements ChatRoomService {
     }
 
     @Override
-    public ChatRoom getAllPrivateMessages(List<String> membersId) {
+    public ChatRoom getAllPrivateMessages(List<String> membersId, String groupName) {
         String chatKey = ChatKeyGenerator.generate(membersId);
         ChatRoom existingChatRoom = chatRoomRepository.findByChatKey(chatKey);
         if (existingChatRoom != null) {
@@ -53,6 +51,7 @@ public class ChatRoomServiceImp implements ChatRoomService {
         ChatRoom newRoom = new ChatRoom();
         newRoom.setMembersId(membersId);
         newRoom.setChatKey(chatKey);
+        newRoom.setGroupName(groupName);
         newRoom.setConversations(new ArrayList<>());
         return chatRoomRepository.save(newRoom);
 

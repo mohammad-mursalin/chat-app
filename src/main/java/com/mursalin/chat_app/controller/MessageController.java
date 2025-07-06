@@ -31,7 +31,7 @@ public class MessageController {
     }
 
     @PostMapping("/chatroom")
-    public ChatRoom getAllPrivateMessages(@RequestBody List<String> membersId) {
-        return chatRoomService.getAllPrivateMessages(membersId);
+    public ChatRoom getAllPrivateMessages(@RequestBody List<String> membersId, @RequestParam(required = false) String groupName) {
+        return chatRoomService.getAllPrivateMessages(membersId, groupName);
     }
 }
