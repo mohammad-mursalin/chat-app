@@ -1,5 +1,6 @@
 package com.mursalin.chat_app.controller;
 
+import com.mursalin.chat_app.dto.GroupListResponse;
 import com.mursalin.chat_app.model.Status;
 import com.mursalin.chat_app.model.User;
 import com.mursalin.chat_app.model.UserPrinciples;
@@ -38,6 +39,11 @@ public class UserController {
     public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         User user = ((UserPrinciples)userDetails).getUser();
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/groups/{currentUserId}")
+    public List<GroupListResponse> getUserGroups(@PathVariable String currentUserId) {
+        return userService.getUserGroups(currentUserId);
     }
 
 }
