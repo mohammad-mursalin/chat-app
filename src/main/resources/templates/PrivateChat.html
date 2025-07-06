@@ -31,7 +31,7 @@
 <body>
 <div class="container mt-4">
     <h1 class="text-center">Real-Time Chat Application</h1>
-    <div class="chat-header text-start" id="chatMemberName"></div>
+    <div class="chat-header text-start" id="chatHeader"></div>
     <div id="chat" class="mb-3"></div>
     <div class="input-group mb-3">
         <input id="messageInput" type="text" class="form-control" placeholder="Type a message..."/>
@@ -40,28 +40,40 @@
 </div>
 
 <script>
-    const params = new URLSearchParams(window.location.search);
-    const chatMemberId = params.get("chatMemberId");
-    const chatMemberName = params.get("chatMemberName");
-    const currentUserId = params.get("currentUserId");
-    const currentUsername = params.get("currentUsername");
-    document.getElementById("chatMemberName").innerText = chatMemberName;
-
     let stompClient = null;
     let chatRoomId = null;
+
+    // 🧠 Get values
+    const chatParticipants = JSON.parse(localStorage.getItem("chatParticipants")) || [];
+    const groupName = localStorage.getItem("groupName");
+    const currentUserId = new URLSearchParams(window.location.search).get("currentUserId");
+    const currentUsername = new URLSearchParams(window.location.search).get("currentUsername");
+
+    // 🧠 Use groupName if valid, else use other participant's name
+    const isGroupChat = groupName && groupName !== "null" && groupName.trim() !== "";
+
+    if (isGroupChat) {
+        document.getElementById("chatHeader").innerText = groupName;
+    } else {
+        const chatMemberId = chatParticipants.find(id => id !== currentUserId);
+        const chatMemberName = new URLSearchParams(window.location.search).get("chatMemberName");
+        document.getElementById("chatHeader").innerText = chatMemberName;
+    }
 
     function setConnected(connected) {
         document.getElementById('sendMessage').disabled = !connected;
     }
 
     function connect() {
-        // 🔁 First fetch or create chat room
-        fetch("http://localhost:8080/chat-app/chatroom", {
+        // 🧠 Safe query for groupName
+        const groupQuery = isGroupChat ? `?groupName=${encodeURIComponent(groupName)}` : "";
+
+        fetch(`http://localhost:8080/chat-app/chatroom${groupQuery}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify([currentUserId, chatMemberId])  // 👈 send as array
+            body: JSON.stringify(chatParticipants)
         })
         .then(response => {
             if (!response.ok) {
@@ -70,18 +82,17 @@
             return response.json();
         })
         .then(chatRoom => {
-            chatRoomId = chatRoom.chatRoomId; // ✅ Save chatRoomId
+            chatRoomId = chatRoom.chatRoomId;
             const conversations = chatRoom.conversations || [];
 
-            // 🕓 Show previous messages
+            // ⏪ Show previous messages
             conversations.forEach(showMessage);
 
-            // 🔌 Connect WebSocket after loading chatRoomId
+            // 🔌 Setup socket
             const socket = new SockJS('http://localhost:8080/homepage');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 setConnected(true);
-                // 📌 Subscribe using chatRoomId (universal for both users)
                 stompClient.subscribe(`/chatroom/${chatRoomId}`, function (message) {
                     showMessage(JSON.parse(message.body));
                 });
@@ -98,11 +109,11 @@
         const messageElement = document.createElement('div');
 
         if (message.senderId === currentUserId) {
-            messageElement.className = "message-right mb-2";
+            messageElement.className = "message-right mb-3";
             messageElement.innerHTML = `<span class="bg-primary text-white p-2 rounded">${message.message}</span>`;
         } else {
-            messageElement.className = "message-left mb-2";
-            messageElement.innerHTML = `<span class="bg-light p-2 rounded">${message.message}</span>`;
+            messageElement.className = "message-left mb-3";
+            messageElement.innerHTML = `<span class="bg-light p-2 rounded">${message.senderName}: ${message.message}</span>`;
         }
 
         chat.appendChild(messageElement);
@@ -115,20 +126,14 @@
 
         const chatMessage = {
             senderId: currentUserId,
-            receiverId: chatMemberId,
+            senderName: currentUsername,
             message: content,
             sendAt: new Date().toISOString()
         };
 
-        // 📤 Send message to backend via WebSocket
         stompClient.send("/chat-app/send-private-message", {}, JSON.stringify({
             chatRoomId: chatRoomId,
-            messageData: {
-                senderId: currentUserId,
-                receiverId: chatMemberId,
-                message: content,
-                sendAt: new Date().toISOString()
-            }
+            messageData: chatMessage
         }));
 
         document.getElementById('messageInput').value = '';

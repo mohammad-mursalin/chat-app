@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class Conversation {
 
     private String senderId;
-    private String receiverId;
+    private String senderName;
     private String message;
     private LocalDateTime sendAt;
 }
