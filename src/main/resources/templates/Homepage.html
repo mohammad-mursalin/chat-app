@@ -8,13 +8,16 @@
 <body>
 <div class="container mt-4">
     <h1 class="text-center">Real-Time Chat Application</h1>
-    
+
     <!-- 🟦 Create Group Button -->
     <div class="text-end mb-3">
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#groupModal" onclick="prepareGroupModal()">Create Group</button>
     </div>
 
-    <h4>Available Users</h4>
+    <h4>Groups You Are In...</h4>
+    <div id="groupList" class="list-group mb-4"></div>
+
+    <h4>Friends To Chat...</h4>
     <div id="userList" class="list-group mb-4"></div>
 </div>
 
@@ -49,28 +52,50 @@
             .then(currentUser => {
                 currentUserId = currentUser.userId;
                 currentUsername = currentUser.username;
-                return fetch("http://localhost:8080/chat-app/users");
-            })
-            .then(response => response.json())
-            .then(users => {
-                allUsers = users;
-                const userList = document.getElementById("userList");
-                users.forEach(user => {
-                    if (user.userId !== currentUserId) {
-                        const userItem = document.createElement("button");
-                        userItem.className = "list-group-item list-group-item-action";
-                        userItem.textContent = user.username;
-                        userItem.onclick = () => {
-                            // 👤 Private chat: store participants in localStorage
-                            localStorage.setItem("chatParticipants", JSON.stringify([currentUserId, user.userId]));
-                            localStorage.setItem("groupName", ""); // Empty string, not null
-                            window.location.href = `private-chat?currentUserId=${currentUserId}&currentUsername=${encodeURIComponent(currentUsername)}&chatMemberName=${encodeURIComponent(user.username)}`;
-                        };
-                        userList.appendChild(userItem);
-                    }
-                });
-            });
+
+                // Fetch all users
+                fetch("http://localhost:8080/chat-app/users")
+                    .then(response => response.json())
+                    .then(users => {
+                        allUsers = users;
+                        const userList = document.getElementById("userList");
+                        users.forEach(user => {
+                            if (user.userId !== currentUserId) {
+                                const userItem = document.createElement("button");
+                                userItem.className = "list-group-item list-group-item-action";
+                                userItem.textContent = user.username;
+                                userItem.onclick = () => {
+                                    localStorage.setItem("chatParticipants", JSON.stringify([currentUserId, user.userId]));
+                                    localStorage.setItem("groupName", ""); // Private chat = no group
+                                    window.location.href = `private-chat?currentUserId=${currentUserId}&currentUsername=${encodeURIComponent(currentUsername)}&chatMemberName=${encodeURIComponent(user.username)}`;
+                                };
+                                userList.appendChild(userItem);
+                            }
+                        });
+                    });
+
+                // 🔁 Fetch groups the user is in
+                fetch(`http://localhost:8080/chat-app/groups/${currentUserId}`)
+                    .then(response => response.json())
+                    .then(groups => {
+                        const groupListDiv = document.getElementById("groupList");
+                        groups.forEach(group => {
+                            const groupItem = document.createElement("button");
+                            groupItem.className = "list-group-item list-group-item-action";
+                            groupItem.textContent = group.groupName;
+
+                            groupItem.onclick = () => {
+                                localStorage.setItem("chatParticipants", JSON.stringify(group.memberList));
+                                localStorage.setItem("groupName", group.groupName);
+                                window.location.href = `private-chat?currentUserId=${currentUserId}&currentUsername=${encodeURIComponent(currentUsername)}`;
+                            };
+
+                            groupListDiv.appendChild(groupItem);
+                        });
+                    });
+        });
     };
+
 
     // 🟩 Prepare group modal
     function prepareGroupModal() {
