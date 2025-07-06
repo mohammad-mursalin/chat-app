@@ -8,5 +8,5 @@ import java.util.List;
 public interface ChatRoomService {
     void privateMessageRequest(ChatMessageRequest chatRoom);
 
-    ChatRoom getAllPrivateMessages(List<String> membersId);
+    ChatRoom getAllPrivateMessages(List<String> membersId, String groupName);
 }
