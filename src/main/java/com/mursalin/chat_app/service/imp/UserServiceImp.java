@@ -1,18 +1,28 @@
 package com.mursalin.chat_app.service.imp;
 
 import com.mursalin.chat_app.dto.GroupListResponse;
+import com.mursalin.chat_app.dto.PasswordResetRequest;
+import com.mursalin.chat_app.model.PasswordResetToken;
 import com.mursalin.chat_app.model.User;
+import com.mursalin.chat_app.repository.PasswordResetTokenRepository;
 import com.mursalin.chat_app.repository.UserRepository;
 import com.mursalin.chat_app.service.UserService;
+import com.mursalin.chat_app.utils.MailSender;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +32,8 @@ public class UserServiceImp implements UserService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final MongoService mongoService;
+    private final PasswordResetTokenRepository resetTokenRepository;
+    private final MailSender mailSender;
 
     @Override
     public User registerNewUser(User newUser) {
