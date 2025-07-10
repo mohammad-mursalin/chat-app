@@ -89,7 +89,7 @@
             conversations.forEach(showMessage);
 
             // 🔌 Setup socket
-            const socket = new SockJS('http://localhost:8080/homepage');
+            const socket = new SockJS('http://localhost:8080/handshake');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 setConnected(true);
