@@ -57,5 +57,51 @@ public class UserServiceImp implements UserService {
         return mongoService.getUserGroups(currentUserId);
     }
 
+    @Override
+    public ResponseEntity<String> handleForgotPassword(String email) {
+        if(userRepository.existsByUserEmail(email)) {
+            String token = generateToken();
+            PasswordResetToken passwordResetToken = PasswordResetToken.builder()
+                    .token(token)
+                    .email(email)
+                    .createdAt(Instant.now())
+                    .expiresAt(Instant.now().plus(Duration.ofMinutes(5)))
+                    .build();
+            resetTokenRepository.save(passwordResetToken);
+            mailSender.sendSimpleMail(email, token);
+            return new ResponseEntity<>("Check your email for verification token", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("No account found with this email", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Transactional
+    @Override
+    public ResponseEntity<String> resetPassword(PasswordResetRequest resetRequest) {
+        Optional<PasswordResetToken> resetTokenOptional = resetTokenRepository.findByEmailandToken(resetRequest.getEmail(), resetRequest.getToken());
+
+        if(resetTokenOptional.isPresent()) {
+            PasswordResetToken resetToken = resetTokenOptional.get();
+            if(resetToken.getExpiresAt().isAfter(Instant.now())) {
+                boolean passwordUpdated = mongoService.updatePasswordByEmail(resetRequest.getEmail(), encoder.encode(resetRequest.getPassword()));
+                if(passwordUpdated) {
+                    resetTokenRepository.delete(resetToken);
+                    return new ResponseEntity<>("Password updated successfully", HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>("Password update attempt failed", HttpStatus.NOT_MODIFIED);
+                }
+            } else {
+                resetTokenRepository.delete(resetToken);
+                return new ResponseEntity<>("token expired", HttpStatus.REQUEST_TIMEOUT);
+            }
+        } else {
+            return new ResponseEntity<>("invalid token or email", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private String generateToken() {
+        return UUID.randomUUID().toString();
+    }
+
 
 }
