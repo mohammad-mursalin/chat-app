@@ -1,6 +1,7 @@
 package com.mursalin.chat_app.controller;
 
 import com.mursalin.chat_app.dto.GroupListResponse;
+import com.mursalin.chat_app.dto.PasswordResetRequest;
 import com.mursalin.chat_app.model.Status;
 import com.mursalin.chat_app.model.User;
 import com.mursalin.chat_app.model.UserPrinciples;
@@ -44,6 +45,16 @@ public class UserController {
     @GetMapping("/groups/{currentUserId}")
     public List<GroupListResponse> getUserGroups(@PathVariable String currentUserId) {
         return userService.getUserGroups(currentUserId);
+    }
+
+    @GetMapping("/forgot-password")
+    public ResponseEntity<String> handleForgotPassword(@RequestBody String email) {
+        return userService.handleForgotPassword(email);
+    }
+
+    @PutMapping("/password-reset")
+    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest resetRequest) {
+        return userService.resetPassword(resetRequest);
     }
 
 }
