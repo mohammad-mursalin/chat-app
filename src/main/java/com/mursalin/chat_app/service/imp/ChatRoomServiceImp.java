@@ -7,10 +7,6 @@ import com.mursalin.chat_app.repository.ChatRoomRepository;
 import com.mursalin.chat_app.service.ChatRoomService;
 import com.mursalin.chat_app.utils.ChatKeyGenerator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -23,19 +19,15 @@ import java.util.List;
 public class ChatRoomServiceImp implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
-    private final MongoTemplate mongoTemplate;
+    private final MongoService mongoService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public void privateMessageRequest(ChatMessageRequest chatMessageRequest) {
         String chatRoomId = chatMessageRequest.getChatRoomId();
 
-        Query query = new Query(Criteria.where("_id").is(chatRoomId));
+        mongoService.addConversationInChatroom(chatRoomId, chatMessageRequest.getMessageData());
 
-        Update update = new Update()
-                .push("conversations", chatMessageRequest.getMessageData());
-
-        mongoTemplate.updateFirst(query, update, ChatRoom.class);
         messagingTemplate.convertAndSend("/chatroom/" + chatRoomId, chatMessageRequest.getMessageData());
     }
 
