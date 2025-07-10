@@ -38,4 +38,16 @@ public class MongoService {
         return result.getModifiedCount() > 0;
     }
 
+    public boolean addConversationInChatroom(String chatRoomId, Conversation conversation) {
+
+        Query query = new Query(Criteria.where("_id").is(chatRoomId));
+
+        Update update = new Update()
+                .push("conversations", conversation);
+
+        UpdateResult result = mongoTemplate.updateFirst(query, update, ChatRoom.class);
+
+        return result.getModifiedCount() > 0;
+    }
+
 }
