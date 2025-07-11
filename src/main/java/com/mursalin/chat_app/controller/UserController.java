@@ -47,12 +47,12 @@ public class UserController {
         return userService.getUserGroups(currentUserId);
     }
 
-    @GetMapping("/forgot-password")
-    public ResponseEntity<String> handleForgotPassword(@RequestBody String email) {
-        return userService.handleForgotPassword(email);
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> handleForgotPassword(@RequestBody PasswordResetRequest resetRequest) {
+        return userService.handleForgotPassword(resetRequest.getEmail());
     }
 
-    @PutMapping("/password-reset")
+    @PostMapping("/password-reset")
     public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest resetRequest) {
         return userService.resetPassword(resetRequest);
     }
