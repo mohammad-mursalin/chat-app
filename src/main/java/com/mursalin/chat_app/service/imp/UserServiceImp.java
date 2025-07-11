@@ -33,7 +33,7 @@ public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
     private final MongoService mongoService;
     private final PasswordResetTokenRepository resetTokenRepository;
-    private final MailSender mailSender;
+    private final MailSenderUtil mailSender;
 
     @Override
     public User registerNewUser(User newUser) {
