@@ -7,7 +7,7 @@ import com.mursalin.chat_app.model.User;
 import com.mursalin.chat_app.repository.PasswordResetTokenRepository;
 import com.mursalin.chat_app.repository.UserRepository;
 import com.mursalin.chat_app.service.UserService;
-import com.mursalin.chat_app.utils.MailSender;
+import com.mursalin.chat_app.utils.MailSenderUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
