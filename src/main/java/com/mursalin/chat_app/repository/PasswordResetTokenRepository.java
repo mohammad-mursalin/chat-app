@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface PasswordResetTokenRepository extends MongoRepository<PasswordResetToken, String> {
-    Optional<PasswordResetToken> findByEmailandToken(String email, String token);
+    Optional<PasswordResetToken> findByEmailAndTokenIgnoreCase(String email, String token);
 }

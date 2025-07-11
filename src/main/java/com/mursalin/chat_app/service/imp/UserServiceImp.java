@@ -90,7 +90,7 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public ResponseEntity<String> resetPassword(PasswordResetRequest resetRequest) {
-        Optional<PasswordResetToken> resetTokenOptional = resetTokenRepository.findByEmailandToken(resetRequest.getEmail(), resetRequest.getToken());
+        Optional<PasswordResetToken> resetTokenOptional = resetTokenRepository.findByEmailAndTokenIgnoreCase(resetRequest.getEmail(), resetRequest.getToken());
 
         if(resetTokenOptional.isPresent()) {
             PasswordResetToken resetToken = resetTokenOptional.get();
