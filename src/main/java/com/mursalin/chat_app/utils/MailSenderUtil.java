@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-public class MailSender {
+@Component
+public class MailSenderUtil {
     private final JavaMailSender mailSender;
     public static final String USER_ACCOUNT_VERIFICATION = "user account verification";
 
