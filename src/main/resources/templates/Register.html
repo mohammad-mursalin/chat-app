@@ -57,12 +57,8 @@
         })
         .then(res => res.ok ? res.json() : null)
         .then(data => {
-<!--            if (data && data.userId && data.username) {-->
-<!--                // ✅ Store to localStorage-->
-<!--                localStorage.setItem("currentUser", JSON.stringify({-->
-<!--                    userId: data.userId,-->
-<!--                    username: data.username-->
-<!--                }));-->
+            if (data && data.userId && data.username) {
+
                 window.location.href = "Homepage.html";
             } else {
                 document.getElementById("errorMsg").textContent = "Registration failed. Try a different email.";
