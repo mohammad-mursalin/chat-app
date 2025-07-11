@@ -24,5 +24,10 @@ public class PageController {
     public String showPrivateChatPage() {
         return "PrivateChat";
     }
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordPage() {
+        return "ForgotPassword";
+    }
 }
 
