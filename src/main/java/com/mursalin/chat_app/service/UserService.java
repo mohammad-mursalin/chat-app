@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserService {
-    User registerNewUser(User newUser);
+    ResponseEntity<String> registerNewUser(User newUser);
 
     User login(User user);
 

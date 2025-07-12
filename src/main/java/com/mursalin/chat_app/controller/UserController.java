@@ -2,7 +2,6 @@ package com.mursalin.chat_app.controller;
 
 import com.mursalin.chat_app.dto.GroupListResponse;
 import com.mursalin.chat_app.dto.PasswordResetRequest;
-import com.mursalin.chat_app.model.Status;
 import com.mursalin.chat_app.model.User;
 import com.mursalin.chat_app.model.UserPrinciples;
 import com.mursalin.chat_app.service.UserService;
@@ -27,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping("/user/registration")
-    public User registration(@RequestBody User newUser) {
+    public ResponseEntity<String> registration(@RequestBody User newUser) {
         return userService.registerNewUser(newUser);
     }
 

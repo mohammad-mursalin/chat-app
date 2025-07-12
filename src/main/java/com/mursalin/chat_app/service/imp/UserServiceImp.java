@@ -36,12 +36,12 @@ public class UserServiceImp implements UserService {
     private final MailSenderUtil mailSender;
 
     @Override
-    public User registerNewUser(User newUser) {
+    public ResponseEntity<String> registerNewUser(User newUser) {
         if(!userRepository.existsByUserEmail(newUser.getUserEmail())) {
             newUser.setPassword(encoder.encode(newUser.getPassword()));
-            return userRepository.save(newUser);
+            return new ResponseEntity<>("Registration successful", HttpStatus.CREATED);
         }else {
-            throw new RuntimeException("already has an account with this email");
+            return new ResponseEntity<>("Already exist user with this email", HttpStatus.CONFLICT);
         }
 
     }
