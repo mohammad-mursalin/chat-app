@@ -37,7 +37,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public ResponseEntity<String> registerNewUser(User newUser) {
-        if(!userRepository.existsByUserEmail(newUser.getUserEmail())) {
+        if(!userRepository.existsByUserEmailIgnoreCase(newUser.getUserEmail())) {
             newUser.setPassword(encoder.encode(newUser.getPassword()));
             return new ResponseEntity<>("Registration successful", HttpStatus.CREATED);
         }else {
@@ -48,7 +48,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User login(User user) {
-        Optional<User> optionalUser = userRepository.findUserByUserEmail(user.getUserEmail());
+        Optional<User> optionalUser = userRepository.findUserByUserEmailIgnoreCase(user.getUserEmail());
         if(optionalUser.isPresent()) {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserEmail(), user.getPassword()));
             if (authentication.isAuthenticated()) {
@@ -71,7 +71,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public ResponseEntity<String> handleForgotPassword(String email) {
-        if(userRepository.existsByUserEmail(email)) {
+        if(userRepository.existsByUserEmailIgnoreCase(email)) {
             String token = generateToken();
             PasswordResetToken passwordResetToken = PasswordResetToken.builder()
                     .token(token)
