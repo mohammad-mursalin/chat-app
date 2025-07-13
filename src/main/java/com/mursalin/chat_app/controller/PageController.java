@@ -29,5 +29,10 @@ public class PageController {
     public String showForgotPasswordPage() {
         return "ForgotPassword";
     }
+
+    @GetMapping("/chat-app/auth/user/reset-password")
+    public String showResetPasswordPage() {
+        return "ResetPassword";
+    }
 }
 
