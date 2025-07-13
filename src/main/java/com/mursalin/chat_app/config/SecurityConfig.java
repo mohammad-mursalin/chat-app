@@ -29,13 +29,12 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/chat-app/user/registration",
-                                        "/chat-app/user/login",
-                                        "/register", "/login", "/forgot-password", "/chat-app/forgot-password", "/chat-app/auth/user/reset-password", "/chat-app/password-reset").permitAll()
+                        request.requestMatchers("/chat-app/auth/user/*",
+                                        "/register", "/login", "/forgot-password", "/chat-app/auth/user/reset-password").permitAll()
                                 .anyRequest().authenticated())
                 .formLogin(form -> form
-                        .loginPage("/login") // shows login.html
-                        .loginProcessingUrl("/perform_login") // where the form submits
+                        .loginPage("/login")
+                        .loginProcessingUrl("/perform_login")
                         .defaultSuccessUrl("/homepage", true)
                         .failureUrl("/login?error=true")
                         .permitAll()
