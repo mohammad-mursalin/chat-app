@@ -37,6 +37,7 @@ public class AuthServiceImp implements AuthService {
     public ResponseEntity<String> registerNewUser(User newUser) {
         if(!userRepository.existsByUserEmailIgnoreCase(newUser.getUserEmail())) {
             newUser.setPassword(encoder.encode(newUser.getPassword()));
+            userRepository.save(newUser);
             return new ResponseEntity<>("Registration successful", HttpStatus.CREATED);
         }else {
             return new ResponseEntity<>("Already exist user with this email", HttpStatus.CONFLICT);
