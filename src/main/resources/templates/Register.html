@@ -50,7 +50,7 @@
             return;
         }
 
-        fetch("http://localhost:8080/chat-app/user/registration", {
+        fetch("http://localhost:8080/chat-app/auth/user/registration", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, userEmail, password })
