@@ -47,26 +47,26 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public User login(User user) {
+    public ResponseEntity<String> login(User user) {
         Optional<User> optionalUser = userRepository.findUserByUserEmailIgnoreCase(user.getUserEmail());
         if(optionalUser.isPresent()) {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserEmail(), user.getPassword()));
             if (authentication.isAuthenticated()) {
-                return optionalUser.get();
+                return new ResponseEntity<>("User login successfull", HttpStatus.OK);
             }
-            throw new RuntimeException("Invalid userEmail or password");
+            return new ResponseEntity<>("Invalid password, Please use correct one", HttpStatus.BAD_REQUEST);
         }
-        throw new RuntimeException("No account found with this email");
+        return new ResponseEntity<>("No account found with this email", HttpStatus.BAD_REQUEST);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public ResponseEntity<List<User>> getAllUsers() {
+        return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
     }
 
     @Override
-    public List<GroupListResponse> getUserGroups(String currentUserId) {
-        return mongoService.getUserGroups(currentUserId);
+    public ResponseEntity<List<GroupListResponse>> getUserGroups(String currentUserId) {
+        return new ResponseEntity<>(mongoService.getUserGroups(currentUserId), HttpStatus.OK);
     }
 
     @Override

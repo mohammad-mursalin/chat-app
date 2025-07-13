@@ -21,7 +21,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users")
-    public List<User> getAllUsers() {
+    public ResponseEntity<List<User>> getAllUsers() {
         return userService.getAllUsers();
     }
 
@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping("/user/login")
-    public User login(@RequestBody User user) {
+    public ResponseEntity<String> login(@RequestBody User user) {
         return userService.login(user);
     }
 
@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/groups/{currentUserId}")
-    public List<GroupListResponse> getUserGroups(@PathVariable String currentUserId) {
+    public ResponseEntity<List<GroupListResponse>> getUserGroups(@PathVariable String currentUserId) {
         return userService.getUserGroups(currentUserId);
     }
 

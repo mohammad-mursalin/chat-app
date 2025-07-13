@@ -5,6 +5,7 @@ import com.mursalin.chat_app.model.ChatRoom;
 import com.mursalin.chat_app.model.Conversation;
 import com.mursalin.chat_app.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -31,7 +32,7 @@ public class MessageController {
     }
 
     @PostMapping("/chatroom")
-    public ChatRoom getAllPrivateMessages(@RequestBody List<String> membersId, @RequestParam(required = false) String groupName) {
+    public ResponseEntity<ChatRoom> getAllPrivateMessages(@RequestBody List<String> membersId, @RequestParam(required = false) String groupName) {
         return chatRoomService.getAllPrivateMessages(membersId, groupName);
     }
 }

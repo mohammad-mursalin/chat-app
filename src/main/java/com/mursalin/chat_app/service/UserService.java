@@ -10,11 +10,11 @@ import java.util.List;
 public interface UserService {
     ResponseEntity<String> registerNewUser(User newUser);
 
-    User login(User user);
+    ResponseEntity<String> login(User user);
 
-    List<User> getAllUsers();
+    ResponseEntity<List<User>> getAllUsers();
 
-    List<GroupListResponse> getUserGroups(String currentUserId);
+    ResponseEntity<List<GroupListResponse>> getUserGroups(String currentUserId);
 
     ResponseEntity<String> handleForgotPassword(String email);
 

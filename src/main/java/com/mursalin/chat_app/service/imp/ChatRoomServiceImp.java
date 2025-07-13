@@ -7,6 +7,8 @@ import com.mursalin.chat_app.repository.ChatRoomRepository;
 import com.mursalin.chat_app.service.ChatRoomService;
 import com.mursalin.chat_app.utils.ChatKeyGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +34,12 @@ public class ChatRoomServiceImp implements ChatRoomService {
     }
 
     @Override
-    public ChatRoom getAllPrivateMessages(List<String> membersId, String groupName) {
+    public ResponseEntity<ChatRoom> getAllPrivateMessages(List<String> membersId, String groupName) {
         String chatKey = ChatKeyGenerator.generate(membersId);
         ChatRoom existingChatRoom = chatRoomRepository.findByChatKey(chatKey);
         if (existingChatRoom != null) {
             existingChatRoom.getConversations().sort(Comparator.comparing(Conversation::getSendAt));
-            return existingChatRoom;
+            return new ResponseEntity<>(existingChatRoom, HttpStatus.OK);
         }
 
         ChatRoom newRoom = new ChatRoom();
@@ -45,7 +47,7 @@ public class ChatRoomServiceImp implements ChatRoomService {
         newRoom.setChatKey(chatKey);
         newRoom.setGroupName(groupName);
         newRoom.setConversations(new ArrayList<>());
-        return chatRoomRepository.save(newRoom);
+        return new ResponseEntity<>(chatRoomRepository.save(newRoom), HttpStatus.OK);
 
     }
 }
