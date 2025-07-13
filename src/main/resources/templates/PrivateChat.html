@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Private Chat</title>
@@ -7,6 +7,42 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.1/stomp.min.js"></script>
     <style>
+        body {
+            overflow-x: hidden;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background-color: #343a40;
+            color: #fff;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .sidebar.collapsed {
+            margin-left: -250px;
+        }
+        .sidebar .logout-btn {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            width: 90%;
+        }
+        .sidebar h4 {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .content {
+            margin-left: 250px;
+            transition: all 0.3s ease;
+            padding: 2rem;
+        }
+        .content.expanded {
+            margin-left: 0;
+        }
         #chat {
             height: 400px;
             overflow-y: auto;
@@ -29,7 +65,18 @@
     </style>
 </head>
 <body>
-<div class="container mt-4">
+
+<!-- ⏩ Sidebar -->
+<div id="sidebar" class="sidebar">
+    <!-- Fixed Toggle Button -->
+<button id="sidebarToggleBtn" class="btn btn-light position-fixed top-0 start-0 m-2 z-3" onclick="toggleSidebar()">☰</button>
+<br><br>
+    <h4 id="sidebarUsername">User</h4>
+    <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<!-- ⏩ Main Content -->
+<div id="mainContent" class="content">
     <h1 class="text-center">Real-Time Chat Application</h1>
     <div class="chat-header text-start" id="chatHeader"></div>
     <div id="chat" class="mb-3"></div>
@@ -43,21 +90,31 @@
     let stompClient = null;
     let chatRoomId = null;
 
-    // 🧠 Get values
     const chatParticipants = JSON.parse(localStorage.getItem("chatParticipants")) || [];
     const groupName = localStorage.getItem("groupName");
     const currentUserId = new URLSearchParams(window.location.search).get("currentUserId");
     const currentUsername = new URLSearchParams(window.location.search).get("currentUsername");
 
-    // 🧠 Use groupName if valid, else use other participant's name
+    // 🧠 Show name on sidebar
+    document.getElementById("sidebarUsername").innerText = currentUsername;
+
     const isGroupChat = groupName && groupName !== "null" && groupName.trim() !== "";
 
     if (isGroupChat) {
         document.getElementById("chatHeader").innerText = groupName;
     } else {
-        const chatMemberId = chatParticipants.find(id => id !== currentUserId);
         const chatMemberName = new URLSearchParams(window.location.search).get("chatMemberName");
         document.getElementById("chatHeader").innerText = chatMemberName;
+    }
+
+    function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("collapsed");
+        document.getElementById("mainContent").classList.toggle("expanded");
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "/logout";
     }
 
     function setConnected(connected) {
@@ -65,7 +122,6 @@
     }
 
     function connect() {
-        // 🧠 Safe query for groupName
         const groupQuery = isGroupChat ? `?groupName=${encodeURIComponent(groupName)}` : "";
 
         fetch(`http://localhost:8080/chat-app/chatroom${groupQuery}`, {
@@ -76,22 +132,18 @@
             body: JSON.stringify(chatParticipants)
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error("Failed to fetch chat room");
-            }
+            if (!response.ok) throw new Error("Failed to fetch chat room");
             return response.json();
         })
         .then(chatRoom => {
             chatRoomId = chatRoom.chatRoomId;
             const conversations = chatRoom.conversations || [];
 
-            // ⏪ Show previous messages
             conversations.forEach(showMessage);
 
-            // 🔌 Setup socket
             const socket = new SockJS('http://localhost:8080/handshake');
             stompClient = Stomp.over(socket);
-            stompClient.connect({}, function (frame) {
+            stompClient.connect({}, function () {
                 setConnected(true);
                 stompClient.subscribe(`/chatroom/${chatRoomId}`, function (message) {
                     showMessage(JSON.parse(message.body));
@@ -112,7 +164,7 @@
             messageElement.className = "message-right mb-3";
             messageElement.innerHTML = `<span class="bg-primary text-white p-2 rounded">${message.message}</span>`;
         } else {
-            if(isGroupChat) {
+            if (isGroupChat) {
                 messageElement.className = "message-left mb-3";
                 messageElement.innerHTML = `<span class="bg-light p-2 rounded">${message.senderName}: ${message.message}</span>`;
             } else {
