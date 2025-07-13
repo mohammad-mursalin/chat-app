@@ -36,7 +36,7 @@ public class MongoService {
     }
 
     public boolean updatePasswordByEmail(String email, String newPassword) {
-        Query query = new Query(Criteria.where("email").is(email));
+        Query query = new Query(Criteria.where("userEmail").is(email));
         Update update = new Update().set("password", newPassword);
         UpdateResult result = mongoTemplate.updateFirst(query, update, User.class);
         return result.getModifiedCount() > 0;
