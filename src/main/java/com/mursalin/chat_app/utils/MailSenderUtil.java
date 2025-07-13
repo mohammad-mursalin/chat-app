@@ -45,6 +45,6 @@ public class MailSenderUtil {
     }
 
     private String getVerificationUrl(String host, String token) {
-        return host + "chat-app/auth/user?token=" + token;
+        return host + "/chat-app/auth/user/reset-password?token=" + token;
     }
 }
