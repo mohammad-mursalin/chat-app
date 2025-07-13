@@ -25,16 +25,6 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PostMapping("/user/registration")
-    public ResponseEntity<String> registration(@RequestBody User newUser) {
-        return userService.registerNewUser(newUser);
-    }
-
-    @PostMapping("/user/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        return userService.login(user);
-    }
-
     @GetMapping("/current-user")
     public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         User user = ((UserPrinciples)userDetails).getUser();
@@ -44,16 +34,6 @@ public class UserController {
     @GetMapping("/groups/{currentUserId}")
     public ResponseEntity<List<GroupListResponse>> getUserGroups(@PathVariable String currentUserId) {
         return userService.getUserGroups(currentUserId);
-    }
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> handleForgotPassword(@RequestBody PasswordResetRequest resetRequest) {
-        return userService.handleForgotPassword(resetRequest.getEmail());
-    }
-
-    @PostMapping("/password-reset")
-    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest resetRequest) {
-        return userService.resetPassword(resetRequest);
     }
 
 }

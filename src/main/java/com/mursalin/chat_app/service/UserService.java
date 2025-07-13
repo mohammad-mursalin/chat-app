@@ -8,15 +8,8 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserService {
-    ResponseEntity<String> registerNewUser(User newUser);
-
-    ResponseEntity<String> login(User user);
 
     ResponseEntity<List<User>> getAllUsers();
 
     ResponseEntity<List<GroupListResponse>> getUserGroups(String currentUserId);
-
-    ResponseEntity<String> handleForgotPassword(String email);
-
-    ResponseEntity<String> resetPassword(PasswordResetRequest resetRequest);
 }
