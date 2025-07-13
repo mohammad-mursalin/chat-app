@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/chat-app/user/registration",
                                         "/chat-app/user/login",
-                                        "/register", "/login", "/forgot-password", "/chat-app/forgot-password").permitAll()
+                                        "/register", "/login", "/forgot-password", "/chat-app/forgot-password", "/chat-app/auth/user/reset-password", "/chat-app/password-reset").permitAll()
                                 .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login") // shows login.html
