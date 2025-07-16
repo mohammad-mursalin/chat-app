@@ -211,8 +211,17 @@
                 stompClient = Stomp.over(socket);
                 stompClient.connect({ userId: currentUserId }, () => {
                     console.log("WebSocket connected");
-                    stompClient.subscribe("/user-online", msg => {
-                        onlineUserIds = JSON.parse(msg.body);
+                    stompClient.subscribe("/user-status", msg => {
+                        const statusUpdate = JSON.parse(msg.body);
+
+                        if (statusUpdate.status === "ONLINE") {
+                            if (!onlineUserIds.includes(statusUpdate.userId)) {
+                                onlineUserIds.push(statusUpdate.userId);
+                            }
+                        } else if (statusUpdate.status === "OFFLINE") {
+                            onlineUserIds = onlineUserIds.filter(id => id !== statusUpdate.userId);
+                        }
+
                         refreshUserList();
                     });
                 });
