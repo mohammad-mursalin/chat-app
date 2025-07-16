@@ -112,6 +112,7 @@
     function refreshUserList() {
         const userList = document.getElementById("userList");
         userList.innerHTML = "";
+
         allUsers.forEach(u => {
             if (u.userId !== currentUserId) {
                 const isOnline = onlineUserIds.includes(u.userId);
@@ -119,7 +120,7 @@
                 btn.className = "list-group-item list-group-item-action d-flex align-items-center";
                 btn.onclick = () => connectToChatroom([currentUserId, u.userId], null, u.username);
                 btn.innerHTML = `
-                    <span class="badge-dot ${isOnline ? 'online-dot' : 'offline-dot'}"></span>
+                    <span id="badge-${u.userId}" class="badge-dot ${isOnline ? 'online-dot' : 'offline-dot'} me-2"></span>
                     <span>${u.username}</span>
                 `;
                 userList.appendChild(btn);
@@ -210,19 +211,12 @@
                 const socket = new SockJS('http://localhost:8080/handshake');
                 stompClient = Stomp.over(socket);
                 stompClient.connect({ userId: currentUserId }, () => {
-                    console.log("WebSocket connected");
                     stompClient.subscribe("/user-status", msg => {
-                        const statusUpdate = JSON.parse(msg.body);
-
-                        if (statusUpdate.status === "ONLINE") {
-                            if (!onlineUserIds.includes(statusUpdate.userId)) {
-                                onlineUserIds.push(statusUpdate.userId);
-                            }
-                        } else if (statusUpdate.status === "OFFLINE") {
-                            onlineUserIds = onlineUserIds.filter(id => id !== statusUpdate.userId);
+                        const { userId, status } = JSON.parse(msg.body);
+                        const badge = document.querySelector(`#badge-${userId}`);
+                        if (badge) {
+                            badge.className = `badge-dot ${status === "ONLINE" ? 'online-dot' : 'offline-dot'}`;
                         }
-
-                        refreshUserList();
                     });
                 });
             });
