@@ -25,36 +25,11 @@
     .sidebar.collapsed { margin-left: -250px; }
     .sidebar h4 { font-size: 1.2rem; margin-bottom: 1rem; }
     .sidebar h6 { margin-top: 1rem; }
-    .sidebar .logout-btn {
-        margin-top: auto; /* Pushes the button to the bottom */
-        width: 100%;
-    }
-    /* Updated styles for scrollable lists */
-    .scrollable-list {
-        overflow-y: auto;
-    }
-
-    #groupList {
-        flex-grow: 0; /* Don't let it grow freely */
-        flex-shrink: 0; /* Don't let it shrink below its content */
-        /* Approximate height for 4 items. Adjust 'item-height' based on your list-group-item styling.
-           A typical list-group-item with default padding and font-size might be around 40-45px tall.
-           Let's aim for 4 items * 45px/item = 180px as a minimum. */
-        min-height: 150px; /* This will ensure enough space for at least 4 items */
-        max-height: 30%; /* You can set a max-height as a percentage of the remaining space if you wish,
-                            or let flex-shrink handle it if userList becomes very large. */
-    }
-
-    #userList {
-        flex-grow: 1; /* Allow userList to take all remaining space */
-        /* Remove max-height to allow flex-grow to manage height */
-    }
-
-    .content {
-        margin-left: 250px;
-        transition: all 0.3s ease;
-        padding: 2rem;
-    }
+    .sidebar .logout-btn { margin-top: auto; width: 100%; }
+    .scrollable-list { overflow-y: auto; }
+    #groupList { min-height: 150px; max-height: 30%; }
+    #userList { flex-grow: 1; }
+    .content { margin-left: 250px; transition: all 0.3s ease; padding: 2rem; }
     .content.expanded { margin-left: 0; }
     #chat {
         height: 400px;
@@ -64,33 +39,33 @@
         border-radius: 0.5rem;
         border: 1px solid #dee2e6;
     }
-    .chat-header {
-        font-weight: bold;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
+    .chat-header { font-weight: bold; font-size: 1.5rem; margin-bottom: 1rem; }
     .message-right { text-align: right; }
     .message-left { text-align: left; }
-</style>
+    .badge-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    .online-dot { background-color: green; }
+    .offline-dot { background-color: gray; }
+    </style>
 </head>
 <body>
-
 <div id="sidebar" class="sidebar">
     <button class="btn btn-light position-fixed top-0 start-0 m-2 z-3" onclick="toggleSidebar()">☰</button>
-    
     <h4 id="sidebarUsername" style="text-align: right;">User</h4>
     <div class="d-flex justify-content-between align-items-center">
         <h6 class="mb-0">Groups</h6>
         <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#groupModal" onclick="prepareGroupModal()">+ Group</button>
     </div>
     <div id="groupList" class="list-group mb-3 scrollable-list"></div>
-
     <h6>Friends</h6>
     <div id="userList" class="list-group scrollable-list"></div>
-
     <button class="btn btn-danger logout-btn mt-3" onclick="logout()">Logout</button>
 </div>
-
 <div id="mainContent" class="content">
     <h1 class="text-center">Real-Time Chat Application</h1>
     <div class="chat-header" id="chatHeader"></div>
@@ -100,8 +75,6 @@
         <button id="sendMessage" class="btn btn-primary">Send</button>
     </div>
 </div>
-
-<!-- Group Creation Modal -->
 <div class="modal fade" id="groupModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-3">
@@ -120,144 +93,157 @@
         </div>
     </div>
 </div>
-
 <script>
-let currentUserId = null;
-let currentUsername = null;
-let allUsers = [];
-let stompClient = null;
-let chatRoomId = null;
-let selectedChat = { participants: [], groupName: null, chatMemberName: null };
+    let currentUserId = null;
+    let currentUsername = null;
+    let allUsers = [];
+    let onlineUserIds = [];
+    let stompClient = null;
+    let chatRoomId = null;
+    let selectedChat = { participants: [], groupName: null, chatMemberName: null };
 
-function toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("collapsed");
-    document.getElementById("mainContent").classList.toggle("expanded");
-}
+    function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("collapsed");
+        document.getElementById("mainContent").classList.toggle("expanded");
+    }
 
-function logout() {
-    window.location.href = "/logout";
-}
+    function logout() { window.location.href = "/logout"; }
 
-function connectToChatroom(participants, groupName, chatMemberName) {
-    selectedChat = { participants, groupName, chatMemberName };
-    document.getElementById("chat").innerHTML = "";
-    document.getElementById("chatHeader").innerText = groupName || chatMemberName;
+    function refreshUserList() {
+        const userList = document.getElementById("userList");
+        userList.innerHTML = "";
+        allUsers.forEach(u => {
+            if (u.userId !== currentUserId) {
+                const isOnline = onlineUserIds.includes(u.userId);
+                const btn = document.createElement("button");
+                btn.className = "list-group-item list-group-item-action d-flex align-items-center";
+                btn.onclick = () => connectToChatroom([currentUserId, u.userId], null, u.username);
+                btn.innerHTML = `
+                    <span class="badge-dot ${isOnline ? 'online-dot' : 'offline-dot'}"></span>
+                    <span>${u.username}</span>
+                `;
+                userList.appendChild(btn);
+            }
+        });
+    }
 
-    if (stompClient) stompClient.disconnect();
+    function connectToChatroom(participants, groupName, chatMemberName) {
+        selectedChat = { participants, groupName, chatMemberName };
+        document.getElementById("chat").innerHTML = "";
+        document.getElementById("chatHeader").innerText = groupName || chatMemberName;
 
-    const groupQuery = groupName ? `?groupName=${encodeURIComponent(groupName)}` : "";
-
-    fetch(`http://localhost:8080/chat-app/chatroom${groupQuery}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(participants)
-    })
-    .then(res => res.json())
-    .then(chatRoom => {
-        chatRoomId = chatRoom.chatRoomId;
-        (chatRoom.conversations || []).forEach(showMessage);
-
-        const socket = new SockJS('http://localhost:8080/handshake');
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, () => {
+        const groupQuery = groupName ? `?groupName=${encodeURIComponent(groupName)}` : "";
+        fetch(`http://localhost:8080/chat-app/chatroom${groupQuery}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(participants)
+        })
+        .then(res => res.json())
+        .then(chatRoom => {
+            chatRoomId = chatRoom.chatRoomId;
+            (chatRoom.conversations || []).forEach(showMessage);
             stompClient.subscribe(`/chatroom/${chatRoomId}`, msg => {
                 showMessage(JSON.parse(msg.body));
             });
         });
-    });
-}
+    }
 
-function showMessage(msg) {
-    const chat = document.getElementById('chat');
-    const el = document.createElement('div');
-    el.className = msg.senderId == currentUserId ? 'message-right mb-3' : 'message-left mb-3';
-    el.innerHTML = msg.senderId == currentUserId
-        ? `<span class="bg-primary text-white p-2 rounded">${msg.message}</span>`
-        : `<span class="bg-light p-2 rounded">${selectedChat.groupName ? msg.senderName + ': ' : ''}${msg.message}</span>`;
-    chat.appendChild(el);
-    chat.scrollTop = chat.scrollHeight;
-}
+    function showMessage(msg) {
+        const chat = document.getElementById('chat');
+        const el = document.createElement('div');
+        el.className = msg.senderId == currentUserId ? 'message-right mb-3' : 'message-left mb-3';
+        el.innerHTML = msg.senderId == currentUserId
+            ? `<span class="bg-primary text-white p-2 rounded">${msg.message}</span>`
+            : `<span class="bg-light p-2 rounded">${selectedChat.groupName ? msg.senderName + ': ' : ''}${msg.message}</span>`;
+        chat.appendChild(el);
+        chat.scrollTop = chat.scrollHeight;
+    }
 
-function sendMessage() {
-    const content = document.getElementById('messageInput').value.trim();
-    if (!content || !chatRoomId) return;
-    const msg = {
-        senderId: currentUserId,
-        senderName: currentUsername,
-        message: content,
-        sendAt: new Date().toISOString()
-    };
-    stompClient.send("/chat-app/send-private-message", {}, JSON.stringify({ chatRoomId, messageData: msg }));
-    document.getElementById('messageInput').value = '';
-}
+    function sendMessage() {
+        const content = document.getElementById('messageInput').value.trim();
+        if (!content || !chatRoomId) return;
+        const msg = {
+            senderId: currentUserId,
+            senderName: currentUsername,
+            message: content,
+            sendAt: new Date().toISOString()
+        };
+        stompClient.send("/chat-app/send-private-message", {}, JSON.stringify({ chatRoomId, messageData: msg }));
+        document.getElementById('messageInput').value = '';
+    }
 
-document.getElementById('sendMessage').onclick = sendMessage;
+    document.getElementById('sendMessage').onclick = sendMessage;
 
-window.onload = function () {
-    fetch("http://localhost:8080/chat-app/current-user")
-        .then(res => res.json())
-        .then(user => {
-            currentUserId = user.userId;
-            currentUsername = user.username;
-            document.getElementById("sidebarUsername").innerText = currentUsername;
+    window.onload = function () {
+        fetch("http://localhost:8080/chat-app/current-user")
+            .then(res => res.json())
+            .then(user => {
+                currentUserId = user.userId;
+                currentUsername = user.username;
+                document.getElementById("sidebarUsername").innerText = currentUsername;
 
-            fetch("http://localhost:8080/chat-app/users")
-                .then(res => res.json())
-                .then(users => {
-                    allUsers = users;
-                    const userList = document.getElementById("userList");
-                    users.forEach(u => {
-                        if (u.userId !== currentUserId) {
+                fetch("http://localhost:8080/chat-app/users")
+                    .then(res => res.json())
+                    .then(users => {
+                        allUsers = users;
+                        fetch("http://localhost:8080/chat-app/online-users")
+                            .then(res => res.json())
+                            .then(onlineIds => {
+                                onlineUserIds = onlineIds;
+                                refreshUserList();
+                            });
+                    });
+
+                fetch(`http://localhost:8080/chat-app/groups/${user.userId}`)
+                    .then(res => res.json())
+                    .then(groups => {
+                        const groupList = document.getElementById("groupList");
+                        groups.forEach(g => {
                             const btn = document.createElement("button");
                             btn.className = "list-group-item list-group-item-action";
-                            btn.textContent = u.username;
-                            btn.onclick = () => connectToChatroom([currentUserId, u.userId], null, u.username);
-                            userList.appendChild(btn);
-                        }
+                            btn.textContent = g.groupName;
+                            btn.onclick = () => connectToChatroom(g.memberList, g.groupName, null);
+                            groupList.appendChild(btn);
+                        });
                     });
-                });
 
-            fetch(`http://localhost:8080/chat-app/groups/${user.userId}`)
-                .then(res => res.json())
-                .then(groups => {
-                    const groupList = document.getElementById("groupList");
-                    groups.forEach(g => {
-                        const btn = document.createElement("button");
-                        btn.className = "list-group-item list-group-item-action";
-                        btn.textContent = g.groupName;
-                        btn.onclick = () => connectToChatroom(g.memberList, g.groupName, null);
-                        groupList.appendChild(btn);
+                const socket = new SockJS('http://localhost:8080/handshake');
+                stompClient = Stomp.over(socket);
+                stompClient.connect({ userId: currentUserId }, () => {
+                    console.log("WebSocket connected");
+                    stompClient.subscribe("/user-online", msg => {
+                        onlineUserIds = JSON.parse(msg.body);
+                        refreshUserList();
                     });
                 });
+            });
+    };
+
+    function prepareGroupModal() {
+        const groupUserList = document.getElementById("groupUserList");
+        groupUserList.innerHTML = "";
+        allUsers.forEach(u => {
+            if (u.userId !== currentUserId) {
+                groupUserList.innerHTML += `<div class="form-check mb-2">
+                    <input class="form-check-input me-2" type="checkbox" value="${u.userId}" id="user-${u.userId}">
+                    <label class="form-check-label me-3" for="user-${u.userId}">${u.username}</label>
+                </div>`;
+            }
         });
-};
+        document.getElementById("groupNameInput").value = "";
+    }
 
-function prepareGroupModal() {
-    const groupUserList = document.getElementById("groupUserList");
-    groupUserList.innerHTML = "";
-    allUsers.forEach(u => {
-        if (u.userId !== currentUserId) {
-            groupUserList.innerHTML += `<div class="form-check mb-2">
-                <input class="form-check-input me-2" type="checkbox" value="${u.userId}" id="user-${u.userId}">
-                <label class="form-check-label me-3" for="user-${u.userId}">${u.username}</label>
-            </div>`;
-        }
-    });
-    document.getElementById("groupNameInput").value = "";
-}
-
-function createGroup() {
-    const name = document.getElementById("groupNameInput").value.trim();
-    if (!name) return alert("Group name is required.");
-    const selected = Array.from(document.querySelectorAll("#groupUserList input:checked")).map(c => c.value);
-    if (selected.length === 0) return alert("Select at least one member.");
-    const members = [currentUserId, ...selected];
-    const modal = bootstrap.Modal.getInstance(document.getElementById('groupModal'));
-    modal.hide();
-    connectToChatroom(members, name, null);
-}
+    function createGroup() {
+        const name = document.getElementById("groupNameInput").value.trim();
+        if (!name) return alert("Group name is required.");
+        const selected = Array.from(document.querySelectorAll("#groupUserList input:checked")).map(c => c.value);
+        if (selected.length === 0) return alert("Select at least one member.");
+        const members = [currentUserId, ...selected];
+        const modal = bootstrap.Modal.getInstance(document.getElementById('groupModal'));
+        modal.hide();
+        connectToChatroom(members, name, null);
+    }
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
