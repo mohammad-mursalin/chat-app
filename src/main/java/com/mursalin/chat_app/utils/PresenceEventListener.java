@@ -1,5 +1,7 @@
 package com.mursalin.chat_app.utils;
 
+import com.mursalin.chat_app.dto.UserStatusEvent;
+import com.mursalin.chat_app.model.Status;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -31,7 +33,7 @@ public class PresenceEventListener {
         if (userId != null && sessionId != null) {
             onlineUsers.add(userId);
             sessionIdToUserId.put(sessionId, userId);
-            messagingTemplate.convertAndSend("/user-online", onlineUsers);
+            messagingTemplate.convertAndSend("/user-status", new UserStatusEvent(userId, Status.ONLINE));
         }
     }
 
@@ -42,7 +44,7 @@ public class PresenceEventListener {
             String userId = sessionIdToUserId.remove(sessionId);
             if (userId != null) {
                 onlineUsers.remove(userId);
-                messagingTemplate.convertAndSend("/user-online", onlineUsers);
+                messagingTemplate.convertAndSend("/user-status", new UserStatusEvent(userId, Status.OFFLINE));
             }
         }
     }
