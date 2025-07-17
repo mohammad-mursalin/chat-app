@@ -7,7 +7,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.1/stomp.min.js"></script>
     <style>
-    body { overflow-x: hidden; }
+    body { 
+        overflow-x: hidden; 
+        background: linear-gradient(to bottom right, #8c7c97, #acaaaa);
+    }
     .sidebar {
         width: 250px;
         height: 100vh;
@@ -29,19 +32,33 @@
     .scrollable-list { overflow-y: auto; }
     #groupList { min-height: 150px; max-height: 30%; }
     #userList { flex-grow: 1; }
-    .content { margin-left: 250px; transition: all 0.3s ease; padding: 2rem; }
+    .content { margin-left: 250px; transition: all 0.3s ease; padding: 2rem; padding-top: 1rem; padding-bottom: 1rem;}
     .content.expanded { margin-left: 0; }
     #chat {
-        height: 400px;
+        height: 450px;
         overflow-y: auto;
-        background-color: #f8f9fa;
+        background: linear-gradient(to bottom right, #7ca886, #acaaaa);
         padding: 1rem;
         border-radius: 0.5rem;
-        border: 1px solid #dee2e6;
+        border: 1px solid #000000;
     }
     .chat-header { font-weight: bold; font-size: 1.5rem; margin-bottom: 1rem; }
     .message-right { text-align: right; }
     .message-left { text-align: left; }
+    .message-right span,
+    .message-left span {
+        max-width: 45%;
+        display: inline-block;
+        word-wrap: break-word;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+    .message-right span {
+    background-color: #944949;
+    }
+    .message-left span {
+        background-color: #634848;
+    }
     .badge-dot {
         width: 10px;
         height: 10px;
@@ -58,7 +75,7 @@
     <button class="btn btn-light position-fixed top-0 start-0 m-2 z-3" onclick="toggleSidebar()">☰</button>
     <h4 id="sidebarUsername" style="text-align: right;">User</h4>
     <div class="d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">Groups</h6>
+        <h6 class="mb-1">Groups</h6>
         <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#groupModal" onclick="prepareGroupModal()">+ Group</button>
     </div>
     <div id="groupList" class="list-group mb-3 scrollable-list"></div>
@@ -69,10 +86,10 @@
 <div id="mainContent" class="content">
     <h1 class="text-center">Real-Time Chat Application</h1>
     <div class="chat-header" id="chatHeader"></div>
-    <div id="chat" class="mb-3"></div>
-    <div class="input-group mb-3">
-        <textarea id="messageInput" class="form-control" rows="1" placeholder="Type a message..." style="resize: none; overflow-y: hidden;"></textarea>
-        <button id="sendMessage" class="btn btn-primary">Send</button>
+    <div id="chat" class="mb-2"></div>
+    <div class="input-group mb-1">
+        <textarea id="messageInput" class="form-control" rows="1" placeholder="Type a message..." style="resize: none; overflow-y: hidden; border-radius: 0.5rem;border: 0.5px solid #000000;"></textarea>
+        <button id="sendMessage" class="btn btn-primary" style="border-radius: 0.5rem;border: 0.5px solid #000000;">Send</button>
     </div>
 </div>
 <div class="modal fade" id="groupModal" tabindex="-1">
@@ -154,8 +171,8 @@
         const el = document.createElement('div');
         el.className = msg.senderId == currentUserId ? 'message-right mb-3' : 'message-left mb-3';
         el.innerHTML = msg.senderId == currentUserId
-            ? `<span class="bg-primary text-white p-2 rounded">${msg.message}</span>`
-            : `<span class="bg-light p-2 rounded">${selectedChat.groupName ? msg.senderName + ': ' : ''}${msg.message}</span>`;
+            ? `<span class=" text-white p-2 rounded">${msg.message}</span>`
+            : `<span class=" text-white p-2 rounded">${selectedChat.groupName ? msg.senderName + ': ' : ''}${msg.message}</span>`;
         chat.appendChild(el);
         chat.scrollTop = chat.scrollHeight;
     }
