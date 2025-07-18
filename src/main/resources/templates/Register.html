@@ -70,35 +70,35 @@
         }
 
         fetch("http://localhost:8080/chat-app/auth/user/registration", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, userEmail, password })
-        })
-        .then(async res => {
-            const message = await res.text();
-            if (res.status === 201) {
-                // ✅ Registration success
-                errorMsgDiv.textContent = message;
-                errorMsgDiv.classList.add("text-success");
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, userEmail, password })
+    })
+    .then(async res => {
+        const message = await res.text();
+        errorMsgDiv.classList.remove("text-danger", "text-success");
 
-                // Optional: Redirect after 2.5 seconds
-                setTimeout(() => {
-                    window.location.href = "ChatPage.html";
-                }, 2500);
-            } else if (res.status === 409) {
-                // ❌ Email already exists
-                errorMsgDiv.textContent = message;
-                errorMsgDiv.classList.add("text-danger");
-            } else {
-                errorMsgDiv.textContent = "Unexpected error: " + message;
-                errorMsgDiv.classList.add("text-danger");
-            }
-        })
-        .catch(() => {
-            errorMsgDiv.textContent = "Error connecting to server.";
+        if (res.status === 201) {
+            errorMsgDiv.textContent = message;
+            errorMsgDiv.classList.add("text-success");
+
+            setTimeout(() => {
+                window.location.href = "ChatPage.html";
+            }, 2500);
+        } else if (res.status === 400 || res.status === 409) {
+            errorMsgDiv.textContent = message;
             errorMsgDiv.classList.add("text-danger");
-        });
+        } else {
+            errorMsgDiv.textContent = "Unexpected error: " + message;
+            errorMsgDiv.classList.add("text-danger");
+        }
+    })
+    .catch(() => {
+        errorMsgDiv.textContent = "Error connecting to server.";
+        errorMsgDiv.classList.remove("text-success");
+        errorMsgDiv.classList.add("text-danger");
     });
+});
 </script>
 
 </body>
