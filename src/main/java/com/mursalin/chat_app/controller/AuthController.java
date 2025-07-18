@@ -1,7 +1,10 @@
 package com.mursalin.chat_app.controller;
+import com.mursalin.chat_app.dto.LoginRequestDto;
 import com.mursalin.chat_app.dto.PasswordResetRequest;
+import com.mursalin.chat_app.dto.RegistrationRequestDto;
 import com.mursalin.chat_app.model.User;
 import com.mursalin.chat_app.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,12 +20,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/registration")
-    public ResponseEntity<String> registration(@RequestBody User newUser) {
+    public ResponseEntity<String> registration(@Valid @RequestBody RegistrationRequestDto newUser) {
         return authService.registerNewUser(newUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDto user) {
         return authService.login(user);
     }
 

@@ -1,12 +1,15 @@
 package com.mursalin.chat_app.service.imp;
 
+import com.mursalin.chat_app.dto.LoginRequestDto;
 import com.mursalin.chat_app.dto.PasswordResetRequest;
+import com.mursalin.chat_app.dto.RegistrationRequestDto;
 import com.mursalin.chat_app.model.PasswordResetToken;
 import com.mursalin.chat_app.model.User;
 import com.mursalin.chat_app.repository.PasswordResetTokenRepository;
 import com.mursalin.chat_app.repository.UserRepository;
 import com.mursalin.chat_app.service.AuthService;
 import com.mursalin.chat_app.utils.MailSenderUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,10 +37,15 @@ public class AuthServiceImp implements AuthService {
     private final MailSenderUtil mailSender;
 
     @Override
-    public ResponseEntity<String> registerNewUser(User newUser) {
+    public ResponseEntity<String> registerNewUser(@Valid RegistrationRequestDto newUser) {
         if(!userRepository.existsByUserEmailIgnoreCase(newUser.getUserEmail())) {
-            newUser.setPassword(encoder.encode(newUser.getPassword()));
-            userRepository.save(newUser);
+            User user = User.builder()
+                    .username(newUser.getUsername())
+                    .userEmail(newUser.getUserEmail())
+                    .password(encoder.encode(newUser.getPassword()))
+                    .build();
+
+            userRepository.save(user);
             return new ResponseEntity<>("Registration successful", HttpStatus.CREATED);
         }else {
             return new ResponseEntity<>("Already exist user with this email", HttpStatus.CONFLICT);
@@ -46,7 +54,7 @@ public class AuthServiceImp implements AuthService {
     }
 
     @Override
-    public ResponseEntity<String> login(User user) {
+    public ResponseEntity<String> login(@Valid LoginRequestDto user) {
         Optional<User> optionalUser = userRepository.findUserByUserEmailIgnoreCase(user.getUserEmail());
         if(optionalUser.isPresent()) {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserEmail(), user.getPassword()));

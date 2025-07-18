@@ -1,7 +1,9 @@
 package com.mursalin.chat_app.service;
 
+import com.mursalin.chat_app.dto.LoginRequestDto;
 import com.mursalin.chat_app.dto.PasswordResetRequest;
-import com.mursalin.chat_app.model.User;
+import com.mursalin.chat_app.dto.RegistrationRequestDto;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthService {
@@ -9,7 +11,7 @@ public interface AuthService {
 
     ResponseEntity<String> resetPassword(PasswordResetRequest resetRequest);
 
-    ResponseEntity<String> registerNewUser(User newUser);
+    ResponseEntity<String> registerNewUser(@Valid RegistrationRequestDto newUser);
 
-    ResponseEntity<String> login(User user);
+    ResponseEntity<String> login(@Valid LoginRequestDto user);
 }
