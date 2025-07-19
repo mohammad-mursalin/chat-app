@@ -11,7 +11,7 @@ public interface AuthService {
 
     ResponseEntity<String> resetPassword(PasswordResetRequest resetRequest);
 
-    ResponseEntity<String> registerNewUser(@Valid RegistrationRequestDto newUser);
+    ResponseEntity<String> registerNewUser(RegistrationRequestDto newUser);
 
-    ResponseEntity<String> login(@Valid LoginRequestDto user);
+    ResponseEntity<String> login(LoginRequestDto user);
 }

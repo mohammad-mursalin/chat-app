@@ -37,7 +37,7 @@ public class AuthServiceImp implements AuthService {
     private final MailSenderUtil mailSender;
 
     @Override
-    public ResponseEntity<String> registerNewUser(@Valid RegistrationRequestDto newUser) {
+    public ResponseEntity<String> registerNewUser(RegistrationRequestDto newUser) {
         if(!userRepository.existsByUserEmailIgnoreCase(newUser.getUserEmail())) {
             User user = User.builder()
                     .username(newUser.getUsername())
@@ -54,7 +54,7 @@ public class AuthServiceImp implements AuthService {
     }
 
     @Override
-    public ResponseEntity<String> login(@Valid LoginRequestDto user) {
+    public ResponseEntity<String> login(LoginRequestDto user) {
         Optional<User> optionalUser = userRepository.findUserByUserEmailIgnoreCase(user.getUserEmail());
         if(optionalUser.isPresent()) {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserEmail(), user.getPassword()));
