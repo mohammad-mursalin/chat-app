@@ -37,10 +37,8 @@ public class ChatRoomServiceImp implements ChatRoomService {
     public ResponseEntity<ChatRoom> getAllPrivateMessages(List<String> membersId, String groupName) {
         String chatKey = ChatKeyGenerator.generate(membersId);
         ChatRoom existingChatRoom = chatRoomRepository.findByChatKey(chatKey);
-        if (existingChatRoom != null) {
-            existingChatRoom.getConversations().sort(Comparator.comparing(Conversation::getSendAt));
+        if (existingChatRoom != null)
             return new ResponseEntity<>(existingChatRoom, HttpStatus.OK);
-        }
 
         ChatRoom newRoom = new ChatRoom();
         newRoom.setMembersId(membersId);
