@@ -27,10 +27,12 @@ public class ChatRoomServiceImp implements ChatRoomService {
     @Override
     public void privateMessageRequest(ChatMessageRequest chatMessageRequest) {
         String chatRoomId = chatMessageRequest.getChatRoomId();
-
-        mongoService.addConversationInChatroom(chatRoomId, chatMessageRequest.getMessageData());
-
-        messagingTemplate.convertAndSend("/chatroom/" + chatRoomId, chatMessageRequest.getMessageData());
+        boolean messageSaved = mongoService.addConversationInChatroom(chatRoomId, chatMessageRequest.getMessageData());
+        if(messageSaved) {
+            messagingTemplate.convertAndSend("/chatroom/" + chatRoomId, chatMessageRequest.getMessageData());
+        } else {
+            messagingTemplate.convertAndSend("/chatroom/error/" + chatRoomId + "/" + chatMessageRequest.getMessageData().getSenderId(), "Error occurred while sending message. Please try sending again");
+        }
     }
 
     @Override

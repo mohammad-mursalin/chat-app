@@ -163,6 +163,10 @@
             stompClient.subscribe(`/chatroom/${chatRoomId}`, msg => {
                 showMessage(JSON.parse(msg.body));
             });
+
+            stompClient.subscribe(`/chatroom/error/${chatRoomId}/${currentUserId}`, errorMsg => {
+                alert(`Message Error: ${errorMsg.body}`);
+            });
         });
     }
 
